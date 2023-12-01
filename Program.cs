@@ -19,7 +19,7 @@ internal class Program
 {
     private const string VERSION = "V1.7";
 
-    private const string key = "";
+    private static string key = System.IO.File.ReadAllText(@"c:\files\rnc\ApiKey.txt");
     private const string HISTORY_FILE = @"..\..\..\history.txt";
     private static OpenAIClient? api = null;
     private static Model model = new Model("gpt-4-1106-preview", "openai");
