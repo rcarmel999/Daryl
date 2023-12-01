@@ -1,0 +1,66 @@
+﻿using OpenAI.Chat;  // Always include this
+using System;
+
+namespace Daryl
+{
+    internal class ListDirectoryTool : ITool
+    {
+        // The Name property returns the class name. (in this case, ListDirectoryTool)
+        public string Name { get {return  "ListDirectoryTool"; } }
+
+        public Function? GetToolDefinition()
+        {
+			// This method returns the information needed for OpenAI to understand the calling parameters the tool needs.
+            return new Function(
+            "ListDirectoryTool", // The name of the tool (same as the class name)
+            "Reads the content of a specified directory or path", // The description of the tool
+            new System.Text.Json.Nodes.JsonObject  // The arguments the tool accepts
+            {
+                ["type"] = "object",
+                ["properties"] = new System.Text.Json.Nodes.JsonObject
+                {
+                    ["DirectoryPath"] = new System.Text.Json.Nodes.JsonObject
+                    {
+                        ["type"] = "string",
+                        ["description"] = "The path for the directory to read its content."
+                    }
+                },
+                ["required"] = new System.Text.Json.Nodes.JsonArray { "DirectoryPath" }  // The list of arguments that are not optional.
+            });
+            // Please note, if the tool does not need any arguments make sure to return a json object with an empty properties object like this:
+            //  new System.Text.Json.Nodes.JsonObject
+            //  {
+            //    ["type"] = "object",
+            //    ["properties"] = new System.Text.Json.Nodes.JsonObject()
+            //  });
+        }
+
+        public OpenAI.Chat.Message? ProcessTool(Tool tool)
+        {
+			// Deserialize the arguments the tool needs.
+            var directoryArgs = System.Text.Json.JsonSerializer.Deserialize<ReadDirectoryContentsParams>(tool.Function.Arguments.ToString());
+            if (directoryArgs != null)
+            {
+                var directoryContent = ReadDirectoryContents(directoryArgs);
+                return new OpenAI.Chat.Message(tool, System.Text.Json.JsonSerializer.Serialize(directoryContent));
+            }
+
+            return null;
+        }
+
+        public static string[] ReadDirectoryContents(ReadDirectoryContentsParams p)
+        {
+            if (p.DirectoryPath != null && Directory.Exists(p.DirectoryPath))
+            {
+                return Directory.GetFiles(p.DirectoryPath);
+            }
+
+            return new string[] { "Directory path is not valid or does not exist." };
+        }
+
+        public class ReadDirectoryContentsParams
+        {
+            public string? DirectoryPath { get; set; }
+        }
+    }
+}
