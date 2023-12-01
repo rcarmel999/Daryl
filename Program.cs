@@ -19,7 +19,7 @@ internal class Program
 {
     private const string VERSION = "V1.7";
 
-    private const string key = "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";
+    private const string key = "";
     private const string HISTORY_FILE = @"..\..\..\history.txt";
     private static OpenAIClient? api = null;
     private static Model model = new Model("gpt-4-1106-preview", "openai");
